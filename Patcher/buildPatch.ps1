@@ -21,7 +21,7 @@ function Format-Path($path)
 function Print-Usage
 {
     Write-Host "Usage:"
-    Write-Host "--rid <RID> --configuration <Configuration=Debug|Release> [--portable] [--cross] [--stripsymbols]"
+    Write-Host "-rid <RID> -configuration <Configuration=Debug|Release> [-portable] [-cross] [-stripsymbols]"
 }
 
 function Check-Arguments
@@ -30,6 +30,28 @@ function Check-Arguments
         Print-Usage
         exit
     }
+}
+
+function Write-VersionInfo {
+    $COMPANYNAME = "Microsoft Corporation"
+    $FILEDESCRIPTION = ".NET Core Host Resolver - ${version_nv}"
+    $PRODUCTNAME = "Microsoft\xae .NET Framework"
+    $PRODUCTVERSION = "0,0,0,0"
+    $PRODUCTVERSION_STR = "${PRODUCTVERSION} @Commit: ${longcommit}"
+    $FILEVERSION = "0,0,0,0"
+    $FILEVERSION_STR = "${FILEVERSION} @Commit: ${longcommit}"
+    $LEGALCOPYRIGHT = "\xa9 Microsoft Corporation. All rights reserved."
+
+    $content = Get-Content -Path ${rootdir}/version_info.h
+    $content = $content.Replace("{COMPANYNAME}", $COMPANYNAME)
+    $content = $content.Replace("{FILEDESCRIPTION}", $FILEDESCRIPTION)
+    $content = $content.Replace("{PRODUCTNAME}", $PRODUCTNAME)
+    $content = $content.Replace("{PRODUCTVERSION}", $PRODUCTVERSION)
+    $content = $content.Replace("{PRODUCTVERSION_STR}", $PRODUCTVERSION_STR)
+    $content = $content.Replace("{FILEVERSION}", $FILEVERSION)
+    $content = $content.Replace("{FILEVERSION_STR}", $FILEVERSION_STR)
+    $content = $content.Replace("{LEGALCOPYRIGHT}", $LEGALCOPYRIGHT)
+    $content | Out-File ${clidir}/version_info.h
 }
 
 $Windows = $([System.Runtime.InteropServices.OSPlatform]::Windows)
@@ -73,7 +95,7 @@ $pcrossbuild   = ""
 $pstripsymbols = ""
 
 if ($Portable) {
-    $pportable = "-portable"
+    $pportable = "portable"
 }
 if ($Cross) {
     $pcrossbuild = "--cross"
@@ -90,8 +112,9 @@ if (!(Test-Path $artifactsdir)) {
 
 # 增量编译
 # 每次发布新版本之后在这里写
-$tags="v2.0.0","v3.0.0","v3.0.0-rc1-19456-20"
-# $tags="v3.0.0"
+# DO NOT DELETE THIS LINE
+# $tags = "v3.0.0-preview-27122-01", "v3.0.0-preview-27324-5"
+# $tags = "v2.0.0"
 
 foreach ($tag in $tags)
 {
@@ -114,10 +137,14 @@ foreach ($tag in $tags)
         git am --continue
         # 获取short commit id
         $commithash = (git rev-list --all --max-count=1 --abbrev-commit)
+        $version_nv = $version.TrimStart("v")
+        $longcommit = (git rev-list --all --max-count=1)
         $buildhash  = $commithash
         $libPath1   = "${workdir}/cli/fxr/${hostfxr}"
         $libPath2   = "${rootdir}/bin/${rid}.${configuration}/corehost/${hostfxr}"
         $libPath3   = "${rootdir}/artifacts/bin/${rid}.${configuration}/corehost/${hostfxr}"
+        $libPath4   = "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/${configuration}/${hostfxr}"
+        $libPath5   = "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/Release/${hostfxr}"
         $libPath    = ""
         if ((Test-Path $libPath1)) {
             rm $libPath1
@@ -128,15 +155,36 @@ foreach ($tag in $tags)
         if ((Test-Path $libPath3)) {
             rm $libPath3
         }
+        if ((Test-Path $libPath4)) {
+            rm $libPath4
+        }
+        if ((Test-Path $libPath5)) {
+            rm $libPath5
+        }
         cd ${workdir}
-        $config = "--configuration ${configuration} --arch ${arch} --hostver ${version} --apphostver ${version} --fxrver ${version} --policyver ${version} --commithash ${buildhash} ${pportable} ${pcrossbuild} ${pstripsymbols}"
+        $config = "
+Configuration: ${configuration}
+Arch: ${arch}
+Version: ${version}
+Commit: ${buildhash}"
+        if ($Portable) {
+            $config = "${config}
+portable"
+        }
+        if ($Cross) {
+            $config = "${config}
+crossbuild"
+        }
+        if ($Stripsymbols) {
+            $config = "${config}
+stripsymbols"
+        }
         Write-Host "building ${config}"
         if (Is-OS($Windows)) {
-            # TODO: windows build
-            Write-Host "TODO: windows build"
-            exit
+            Write-VersionInfo
+            powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} ${pportable} rid ${RID}
         } else {
-            bash $workdir/build.sh --configuration ${configuration} --arch ${arch} --hostver ${version} --apphostver ${version} --fxrver ${version} --policyver ${version} --commithash ${buildhash} ${pportable} ${pcrossbuild} ${pstripsymbols}
+            bash $workdir/build.sh --configuration ${configuration} --arch ${arch} --hostver ${version} --apphostver ${version} --fxrver ${version} --policyver ${version} --commithash ${buildhash} -${pportable} ${pcrossbuild} ${pstripsymbols}
         }
         if ((Test-Path $libPath1)) {
             $libPath = $libPath1
@@ -144,8 +192,16 @@ foreach ($tag in $tags)
             $libPath = $libPath2
         } elseif ((Test-Path $libPath3)) {
             $libPath = $libPath3
+        } elseif ((Test-Path $libPath4)) {
+            $libPath = $libPath4
+        } elseif ((Test-Path $libPath5)) {
+            $libPath = $libPath5
         }
-        cp $libPath "${bindir}/${hostfxr}"
+        if ($libPath) {
+            cp $libPath "${bindir}/${hostfxr}"
+        } else {
+            Write-Host "无法找到${tag}编译后fxr位置"
+        }
         git am --abort
         git reset --hard ${tag}
         if ((Test-Path "${workdir}/CMakeCache.txt")) {
@@ -158,3 +214,5 @@ foreach ($tag in $tags)
 "
     }
 }
+
+cd ${rootdir}
