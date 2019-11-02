@@ -110,6 +110,8 @@ if (!(Test-Path $artifactsdir)) {
     mkdir -p $artifactsdir
 }
 
+$versionMap = (Get-Content "VersionMapping.json") | ConvertFrom-Json
+
 # 增量编译
 # 每次发布新版本之后在这里写
 # DO NOT DELETE THIS LINE
@@ -124,13 +126,16 @@ foreach ($tag in $tags)
         if (($tag -like "v2*") -and ($tag -match "[^v\d\.]")) {
             continue
         }
+        $version = $tag
+        if ($versionMap.$tag) {
+            $version = $versionMap.$tag;
+        }
         cd $rootdir
-        $bindir = "${artifactsdir}/${tag}/${rid}.${configuration}"
+        $bindir = "${artifactsdir}/${version}/${rid}.${configuration}"
         if (!(Test-Path $bindir)) {
             mkdir -p $bindir
         }
-        Write-Host "${tag}编译中..."
-        $version = $tag
+        Write-Host "${version}编译中..."
         git reset --hard HEAD
         git checkout $tag
         git am $patch
@@ -200,7 +205,7 @@ stripsymbols"
         if ($libPath) {
             cp $libPath "${bindir}/${hostfxr}"
         } else {
-            Write-Host "无法找到${tag}编译后fxr位置"
+            Write-Host "无法找到${version}编译后fxr位置"
         }
         git am --abort
         git reset --hard ${tag}
@@ -210,7 +215,7 @@ stripsymbols"
         cd ${clidir}
         git clean -df
         cd ${workdir}
-        Write-Host "${tag}编译完成
+        Write-Host "${version}编译完成
 "
     }
 }
