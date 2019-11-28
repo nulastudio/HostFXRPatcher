@@ -73,6 +73,7 @@ $workdir      = Format-Path "${rootdir}/src/corehost"
 $clidir       = Format-Path "${workdir}/cli"
 $artifactsdir = Format-Path "${rootdir}/artifacts-patched"
 $patch        = Format-Path "${rootdir}/0001-fix-additionalProbingPaths-resolver.patch"
+$patch2       = Format-Path "${rootdir}/0002-use-pre-install-sdk.patch"
 
 $arch=$RID.Split('-')[1]
 $configuration=$Configuration
@@ -139,6 +140,7 @@ foreach ($tag in $tags)
         git reset --hard HEAD
         git checkout $tag
         git am $patch
+        git am $patch2
         git am --continue
         # 获取short commit id
         $commithash = (git rev-list --all --max-count=1 --abbrev-commit)
