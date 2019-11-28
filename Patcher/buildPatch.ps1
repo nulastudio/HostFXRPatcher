@@ -74,6 +74,7 @@ $clidir       = Format-Path "${workdir}/cli"
 $artifactsdir = Format-Path "${rootdir}/artifacts-patched"
 $patch        = Format-Path "${rootdir}/0001-fix-additionalProbingPaths-resolver.patch"
 $patch2       = Format-Path "${rootdir}/0002-use-pre-install-sdk.patch"
+$sdkdir       = Format-Path "${rootdir}/PreInstallSdks"
 
 $arch=$RID.Split('-')[1]
 $configuration=$Configuration
@@ -109,6 +110,10 @@ $tags=(git tag)
 
 if (!(Test-Path $artifactsdir)) {
     mkdir -p $artifactsdir
+}
+
+if (!(Test-Path $sdkdir)) {
+    mkdir -p $sdkdir
 }
 
 $versionMap = (Get-Content "VersionMapping.json") | ConvertFrom-Json
