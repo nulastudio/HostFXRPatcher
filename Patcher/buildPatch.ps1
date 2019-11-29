@@ -106,8 +106,6 @@ if ($Stripsymbols) {
     $pstripsymbols = "--stripsymbols"
 }
 
-$tags=(git tag)
-
 if (!(Test-Path $artifactsdir)) {
     mkdir -p $artifactsdir
 }
@@ -117,14 +115,15 @@ if (!(Test-Path $sdkdir)) {
 }
 
 $versionMap = (Get-Content "VersionMapping.json") | ConvertFrom-Json
+[System.Collections.ArrayList]$versionBuilt = @()
+if (Test-Path("VersionBuilt.json")) {
+    $versionBuilt = (Get-Content "VersionBuilt.json") | ConvertFrom-Json
+}
 
-# 增量编译
-# 每次发布新版本之后在这里写
-# DO NOT DELETE THIS LINE
-# $tags = "v3.0.0-preview-27122-01", "v3.0.0-preview-27324-5"
-# $tags = "v2.0.0"
+[System.Collections.ArrayList]$tags = @()
 
-foreach ($tag in $tags)
+# 版本过滤
+foreach ($tag in (git tag))
 {
     # 只编译2.x以及3.x
     if (($tag -like "v2*") -or ($tag -like "v3*")) {
@@ -132,99 +131,131 @@ foreach ($tag in $tags)
         if (($tag -like "v2*") -and ($tag -match "[^v\d\.]")) {
             continue
         }
-        $version = $tag
-        if ($versionMap.$tag) {
-            $version = $versionMap.$tag;
+        if ($versionBuilt.Contains($tag)) {
+            continue
         }
-        cd $rootdir
-        $bindir = "${artifactsdir}/${version}/${rid}.${configuration}"
-        if (!(Test-Path $bindir)) {
-            mkdir -p $bindir
-        }
-        Write-Host "${version}编译中..."
-        git reset --hard HEAD
-        git checkout $tag
-        git am $patch
-        git am $patch2
-        git am --continue
-        # 获取short commit id
-        $commithash = (git rev-list --all --max-count=1 --abbrev-commit)
-        $version_nv = $version.TrimStart("v")
-        $longcommit = (git rev-list --all --max-count=1)
-        $buildhash  = $commithash
-        $libPath1   = "${workdir}/cli/fxr/${hostfxr}"
-        $libPath2   = "${rootdir}/bin/${rid}.${configuration}/corehost/${hostfxr}"
-        $libPath3   = "${rootdir}/artifacts/bin/${rid}.${configuration}/corehost/${hostfxr}"
-        $libPath4   = "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/${configuration}/${hostfxr}"
-        $libPath5   = "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/Release/${hostfxr}"
-        $libPath    = ""
-        if ((Test-Path $libPath1)) {
-            rm $libPath1
-        }
-        if ((Test-Path $libPath2)) {
-            rm $libPath2
-        }
-        if ((Test-Path $libPath3)) {
-            rm $libPath3
-        }
-        if ((Test-Path $libPath4)) {
-            rm $libPath4
-        }
-        if ((Test-Path $libPath5)) {
-            rm $libPath5
-        }
-        cd ${workdir}
-        $config = "
+        [void]$tags.Add($tag)
+    }
+}
+
+# 增量编译
+# 每次发布新版本之后在这里写
+# DO NOT DELETE THIS LINE
+
+# 自定义版本编译
+# $tags = "vx.y.z", "vx.y.z", "vx.y.z"
+# 追加版本编译
+# $tags.Add("vx.y.z")
+
+# 去重
+[System.Collections.ArrayList]$tmp = @()
+foreach ($tag in $tags) {
+    if (!$tmp.Contains($tag)) {
+        [void]$tmp.Add($tag);
+    }
+}
+$tags = $tmp
+
+foreach ($tag in $tags)
+{
+    if (!$versionBuilt.Contains($tag)) {
+        [void]$versionBuilt.Add($tag);
+    }
+    $version = $tag
+    if ($versionMap.$tag) {
+        $version = $versionMap.$tag;
+    }
+    continue
+    cd $rootdir
+    $bindir = "${artifactsdir}/${version}/${rid}.${configuration}"
+    if (!(Test-Path $bindir)) {
+        mkdir -p $bindir
+    }
+    Write-Host "${version}编译中..."
+    git reset --hard HEAD
+    git checkout $tag
+    git am $patch
+    git am $patch2
+    git am --continue
+    # 获取short commit id
+    $commithash = (git rev-list --all --max-count=1 --abbrev-commit)
+    $version_nv = $version.TrimStart("v")
+    $longcommit = (git rev-list --all --max-count=1)
+    $buildhash  = $commithash
+    $libPath1   = "${workdir}/cli/fxr/${hostfxr}"
+    $libPath2   = "${rootdir}/bin/${rid}.${configuration}/corehost/${hostfxr}"
+    $libPath3   = "${rootdir}/artifacts/bin/${rid}.${configuration}/corehost/${hostfxr}"
+    $libPath4   = "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/${configuration}/${hostfxr}"
+    $libPath5   = "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/Release/${hostfxr}"
+    $libPath    = ""
+    if ((Test-Path $libPath1)) {
+        rm $libPath1
+    }
+    if ((Test-Path $libPath2)) {
+        rm $libPath2
+    }
+    if ((Test-Path $libPath3)) {
+        rm $libPath3
+    }
+    if ((Test-Path $libPath4)) {
+        rm $libPath4
+    }
+    if ((Test-Path $libPath5)) {
+        rm $libPath5
+    }
+    cd ${workdir}
+    $config = "
 Configuration: ${configuration}
 Arch: ${arch}
 Version: ${version}
 Commit: ${buildhash}"
-        if ($Portable) {
-            $config = "${config}
+    if ($Portable) {
+        $config = "${config}
 portable"
-        }
-        if ($Cross) {
-            $config = "${config}
-crossbuild"
-        }
-        if ($Stripsymbols) {
-            $config = "${config}
-stripsymbols"
-        }
-        Write-Host "building ${config}"
-        if (Is-OS($Windows)) {
-            Write-VersionInfo
-            powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} ${pportable} rid ${RID}
-        } else {
-            bash $workdir/build.sh --configuration ${configuration} --arch ${arch} --hostver ${version} --apphostver ${version} --fxrver ${version} --policyver ${version} --commithash ${buildhash} -${pportable} ${pcrossbuild} ${pstripsymbols}
-        }
-        if ((Test-Path $libPath1)) {
-            $libPath = $libPath1
-        } elseif ((Test-Path $libPath2)) {
-            $libPath = $libPath2
-        } elseif ((Test-Path $libPath3)) {
-            $libPath = $libPath3
-        } elseif ((Test-Path $libPath4)) {
-            $libPath = $libPath4
-        } elseif ((Test-Path $libPath5)) {
-            $libPath = $libPath5
-        }
-        if ($libPath) {
-            cp $libPath "${bindir}/${hostfxr}"
-        } else {
-            Write-Host "无法找到${version}编译后fxr位置"
-        }
-        git am --abort
-        git reset --hard ${tag}
-        if ((Test-Path "${workdir}/CMakeCache.txt")) {
-            rm "${workdir}/CMakeCache.txt"
-        }
-        cd ${clidir}
-        git clean -df
-        cd ${workdir}
-        Write-Host "${version}编译完成
-"
     }
+    if ($Cross) {
+        $config = "${config}
+crossbuild"
+    }
+    if ($Stripsymbols) {
+        $config = "${config}
+stripsymbols"
+    }
+    Write-Host "building ${config}"
+    if (Is-OS($Windows)) {
+        Write-VersionInfo
+        powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} ${pportable} rid ${RID}
+    } else {
+        bash $workdir/build.sh --configuration ${configuration} --arch ${arch} --hostver ${version} --apphostver ${version} --fxrver ${version} --policyver ${version} --commithash ${buildhash} -${pportable} ${pcrossbuild} ${pstripsymbols}
+    }
+    if ((Test-Path $libPath1)) {
+        $libPath = $libPath1
+    } elseif ((Test-Path $libPath2)) {
+        $libPath = $libPath2
+    } elseif ((Test-Path $libPath3)) {
+        $libPath = $libPath3
+    } elseif ((Test-Path $libPath4)) {
+        $libPath = $libPath4
+    } elseif ((Test-Path $libPath5)) {
+        $libPath = $libPath5
+    }
+    if ($libPath) {
+        cp $libPath "${bindir}/${hostfxr}"
+    } else {
+        Write-Host "无法找到${version}编译后fxr位置"
+    }
+    git am --abort
+    git reset --hard ${tag}
+    if ((Test-Path "${workdir}/CMakeCache.txt")) {
+        rm "${workdir}/CMakeCache.txt"
+    }
+    cd ${clidir}
+    git clean -df
+    cd ${workdir}
+    Write-Host "${version}编译完成
+"
 }
 
 cd ${rootdir}
+
+WriteFile -Path "VersionBuilt.json" -Value ($versionBuilt | ConvertTo-Json)
