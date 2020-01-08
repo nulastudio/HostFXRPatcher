@@ -131,10 +131,14 @@ foreach ($tag in (git tag))
         if (($tag -like "v2*") -and ($tag -match "[^v\d\.]")) {
             continue
         }
-        if ($versionBuilt.Contains($tag)) {
+        $version = $tag
+        if ($versionMap.$tag) {
+            $version = $versionMap.$tag
+        }
+        if ($versionBuilt.Contains($version)) {
             continue
         }
-        [void]$tags.Add($tag)
+        [void]$tags.Add($version)
     }
 }
 
@@ -158,14 +162,10 @@ $tags = $tmp
 
 foreach ($tag in $tags)
 {
-    if (!$versionBuilt.Contains($tag)) {
-        [void]$versionBuilt.Add($tag);
-    }
     $version = $tag
-    if ($versionMap.$tag) {
-        $version = $versionMap.$tag;
+    if (!$versionBuilt.Contains($version)) {
+        [void]$versionBuilt.Add($version)
     }
-    continue
     cd $rootdir
     $bindir = "${artifactsdir}/${version}/${rid}.${configuration}"
     if (!(Test-Path $bindir)) {
@@ -258,4 +258,4 @@ stripsymbols"
 
 cd ${rootdir}
 
-WriteFile -Path "VersionBuilt.json" -Value ($versionBuilt | ConvertTo-Json)
+WriteFile -Path "VersionBuilt.json" -Value ($versionBuilt | Sort-Object | ConvertTo-Json)
