@@ -144,8 +144,8 @@ function Update-Runtime-Supported-JSON() {
 
 if ($hasUpdate) {
     $timestamp = (([DateTime]::Now.ToUniversalTime().Ticks - 621355968000000000)/10000000).tostring().Substring(0,10)
-    $timestamp | Out-File -Encoding UTF8 -NoNewline $artifactstxtpath
+    $timestamp | Out-File -Encoding Utf8NoBom -NoNewline $artifactstxtpath
 }
 
-Sort-Dict -Dict $ArtifactsVersion | ConvertTo-Json | Out-File -Encoding UTF8 $artifactspath
-Sort-Dict -Dict $Md5 | ConvertTo-Json | Out-File -Encoding UTF8 $md5path
+Sort-Dict -Dict $ArtifactsVersion | ConvertTo-Json | Out-File -Encoding Utf8NoBom $artifactspath
+Sort-Dict -Dict $Md5 | ConvertTo-Json | Out-File -Encoding Utf8NoBom $md5path
