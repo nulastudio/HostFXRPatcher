@@ -1,4 +1,4 @@
-$rootdir = $pwd
+$rootdir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $artifactsdir = "${rootdir}/artifacts"
 $artifactspath = "${artifactsdir}/ArtifactsVersion.json"
 $artifactstxtpath = "${artifactsdir}/ArtifactsVersion.txt"
