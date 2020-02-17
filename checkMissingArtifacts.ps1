@@ -7,7 +7,7 @@ if (!(Test-Path "${artifactsdir}")) {
     exit
 }
 
-$arches = "win-x86", "win-x64", "linux-x64", "osx-x64"
+$arches = (Get-Content "${artifactsdir}/runtime.supported.json") | ConvertFrom-Json
 
 function Check-Arch($path) {
     $segment = $path.Split("/")
