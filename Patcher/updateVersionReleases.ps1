@@ -57,4 +57,10 @@ foreach ($releaseIndex in $releasesIndex."releases-index") {
     }
 }
 
-WriteFile -Path "VersionReleased.json" -Value ($versions | Sort-Object | ConvertTo-Json)
+$json = $versions | Sort-Object | ConvertTo-Json
+
+if (!$json) {
+    $json = "[]"
+}
+
+WriteFile -Path "${rootdir}/VersionReleased.json" -Value $json
