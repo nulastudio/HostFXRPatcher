@@ -27,9 +27,11 @@ if (Test-Path($md5path)) {
 function Write-Runtime-JSON() {
     if (!($ArtifactsVersion.Contains("runtime/compatibility"))) {
         $ArtifactsVersion["runtime/compatibility"] = "0"
+        $script:hasUpdate = $true
     }
     if (!($ArtifactsVersion.Contains("runtime/supported"))) {
         $ArtifactsVersion["runtime/supported"] = "0"
+        $script:hasUpdate = $true
     }
 }
 
@@ -102,12 +104,12 @@ $ht_runtime = @{
 
 foreach ($key in $ht_runtime.GetEnumerator()) {
     if ($Md5[$key.Key] -ne $key.Value) {
-        $Md5[$key.Key] = $key.Value
-        if ($Md5.Contains($key.Key) -and $ArtifactsVersion[$key.Key] -ne "0") {
-            Write-Host "Update $($key.Key)"
+        Write-Host "Update $($key.Key)"
+        if ($Md5.Contains($key.Key)) {
             Update-Artifact -Artifact $key.Key
-            $script:hasUpdate = $true
         }
+        $Md5[$key.Key] = $key.Value
+        $script:hasUpdate = $true
     }
 }
 
