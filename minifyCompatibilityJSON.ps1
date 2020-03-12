@@ -29,13 +29,17 @@ foreach($runtime in $compatibilityJson.psobject.properties.name)
 {
     $runtimes = $compatibilityJson.$runtime
     [System.Collections.ArrayList]$minifyRuntimes = @()
-    $supportedJson | ForEach-Object -Process {
-        $supportedRuntime = $_
+    foreach($supportedRuntime in $supportedJson)
+    {
         if ($runtimes.Contains($supportedRuntime)) {
             [void]$minifyRuntimes.Add($supportedRuntime)
+            # NOTE: 原来的json已经拥有优先级，第一个匹配出来的必然是最优选择，添加一个就够了
+            break
         }
     }
-    $minifyCompatibilityJson[$runtime] = $minifyRuntimes
+    if ($minifyRuntimes.Length) {
+        $minifyCompatibilityJson[$runtime] = $minifyRuntimes
+    }
 }
 
 Sort-Dict -Dict $minifyCompatibilityJson | ConvertTo-Json -Compress | Out-File -NoNewline -Encoding Utf8NoBom $compatibilitypath
