@@ -1,5 +1,5 @@
 {
-  "runtime/compatibility": "1",
+  "runtime/compatibility": "2",
   "runtime/supported": "0",
   "v2.0.0/linux-x64": "0",
   "v2.0.0/osx-x64": "0",
