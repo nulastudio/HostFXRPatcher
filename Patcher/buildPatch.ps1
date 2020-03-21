@@ -175,7 +175,9 @@ foreach ($tag in $tags)
     git reset --hard HEAD
     git checkout $tag
     git am $patch
-    git am $patch2
+    if (Test-Path "${rootdir}/init-tools.cmd") {
+        git am $patch2
+    }
     git am --continue
     # 获取short commit id
     $commithash = (git rev-list --all --max-count=1 --abbrev-commit)
@@ -246,11 +248,13 @@ stripsymbols"
     }
     git am --abort
     git reset --hard ${tag}
-    if ((Test-Path "${workdir}/CMakeCache.txt")) {
-        rm "${workdir}/CMakeCache.txt"
+    cd ${rootdir}
+    dir -r "CMakeCache.txt" | ForEach-Object {
+        rm $_
     }
-    cd ${clidir}
-    git clean -df
+    dir -r "CMakeLists.txt" | ForEach-Object {
+        rm $_
+    }
     cd ${workdir}
     Write-Host "${version}编译完成
 "
