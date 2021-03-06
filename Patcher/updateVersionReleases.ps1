@@ -63,4 +63,4 @@ if (!$json) {
     $json = "[]"
 }
 
-WriteFile -Path "${rootdir}/VersionReleased.json" -Value $json
+$json | Out-File -Path "${rootdir}/VersionReleased.json"
