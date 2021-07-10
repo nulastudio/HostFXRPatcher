@@ -42,4 +42,4 @@ foreach($runtime in $compatibilityJson.psobject.properties.name)
     }
 }
 
-Sort-Dict -Dict $minifyCompatibilityJson | ConvertTo-Json -Compress | Out-File -NoNewline -Encoding Utf8NoBom $compatibilitypath
+Sort-Dict -Dict $minifyCompatibilityJson | ConvertTo-Json -Compress | Out-File -NoNewline -Encoding "Utf8NoBom" $compatibilitypath
