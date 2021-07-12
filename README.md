@@ -1,1 +1,1 @@
-[How can i build my own artifacts?](https://github.com/nulastudio/HostFXRPatcher/tree/patcher)
+[How can i build my own artifacts?](https://github.com/nulastudio/HostFXRPatcher/tree/Patcher)
