@@ -149,5 +149,5 @@ if ($hasUpdate) {
     $timestamp | Out-File -Encoding "Utf8NoBom" -NoNewline $artifactstxtpath
 }
 
-Sort-Dict -Dict $ArtifactsVersion | ConvertTo-Json | Out-File -Encoding "Utf8NoBom" $artifactspath
-Sort-Dict -Dict $Md5 | ConvertTo-Json | Out-File -Encoding "Utf8NoBom" $md5path
+(Sort-Dict -Dict $ArtifactsVersion | ConvertTo-Json).Replace("`r`n", "`n") | Out-File -Encoding "Utf8NoBom" $artifactspath
+(Sort-Dict -Dict $Md5 | ConvertTo-Json).Replace("`r`n", "`n") | Out-File -Encoding "Utf8NoBom" $md5path
