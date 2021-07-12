@@ -201,7 +201,7 @@ if (Test-Path("${scriptdir}/VersionReleased.json")) {
 [System.Collections.ArrayList]$tags = @()
 
 # 全新编译
-$versionBuilt = @()
+# $versionBuilt = @()
 
 # 版本过滤
 foreach ($tag in (git tag))
@@ -228,8 +228,10 @@ foreach ($tag in (git tag))
 # DO NOT DELETE THIS LINE
 
 # 自定义版本编译
-$tags = @()
-[void]$tags.Add("v5.0.0")
+# $tags = @()
+# [void]$tags.Add("v2.2.0")
+# [void]$tags.Add("v3.0.0")
+# [void]$tags.Add("v5.0.0")
 
 # 去重
 [System.Collections.ArrayList]$tmp = @()
