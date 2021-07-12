@@ -69,6 +69,10 @@ function Write-VersionInfo {
 }
 
 function Fix-CMake-Version-Detect {
+    if (!(Test-Path "${rootdir}/eng/native/build-commons.sh")) {
+        return
+    }
+
     $content = Get-Content -Raw -Path ${rootdir}/eng/native/build-commons.sh
     $content = $content.Replace("[0-9]+\.[0-9]+\.[0-9]+$", "[0-9]+\.[0-9]+\.[0-9]+")
     $content | Out-File ${rootdir}/eng/native/build-commons.sh
@@ -77,16 +81,30 @@ function Fix-CMake-Version-Detect {
 function Fix-Patch {
     Write-Message "Patching"
 
+    if (!(Test-Path "${clidir}/runtime_config.cpp")) {
+        Write-Message "Patch Failed
+
+${clidir}/runtime_config.cpp does not exist." $true
+        return
+    }
+
     $content = Get-Content -Raw -Path ${clidir}/runtime_config.cpp
 
     $magicString = "/* HostFXRPatcher */"
 
-    # v5.*
+    # v2.*/v3.*
+    $content = $content.Replace("m_probe_paths.insert(m_probe_paths.begin(), probe_paths->second.as_string());", "m_probe_paths.insert(m_probe_paths.begin(), get_directory(m_path).c_str() + probe_paths->second.as_string());" + $magicString)
+    $content = $content.Replace("m_probe_paths.push_front(iter->as_string());", "m_probe_paths.push_front(get_directory(m_path).c_str() + iter->as_string());" + $magicString)
+
+    # v5.*/v6.*
     $content = $content.Replace("m_probe_paths.insert(m_probe_paths.begin(), probe_paths->value.GetString());", "m_probe_paths.insert(m_probe_paths.begin(), get_directory(m_path) + probe_paths->value.GetString());" + $magicString)
     $content = $content.Replace("m_probe_paths.push_front(begin->GetString());", "m_probe_paths.push_front(get_directory(m_path) + begin->GetString());" + $magicString)
 
     if (!$content.Contains($magicString)) {
-        Write-Message "Patch Failed" $true
+        Write-Message "Patch Failed
+
+No Patch Found.
+" $true
         exit
     } else {
         Write-Message "Patch Success"
@@ -96,6 +114,10 @@ function Fix-Patch {
 }
 
 function Remove-Unneed-Build {
+    if (!(Test-Path "${clidir}/CMakeLists.txt")) {
+        return
+    }
+
     Write-Message "Remove Unneed Builds"
 
     $content = Get-Content -Path ${clidir}/CMakeLists.txt
@@ -130,11 +152,11 @@ $artifactsdir = Format-Path "${rootdir}/artifacts-patched"
 $workdir      = ""
 $clidir       = ""
 
-$workdir1     = Format-Path "${rootdir}/src/installer/corehost"
-$clidir1      = Format-Path "${workdir1}/cli"
-
-$workdir2     = Format-Path "${rootdir}/src/native/corehost"
-$clidir2      = $workdir2
+$workdirs = (
+    ((Format-Path "${rootdir}/src/corehost"), "cli"),
+    ((Format-Path "${rootdir}/src/installer/corehost"), "cli"),
+    ((Format-Path "${rootdir}/src/native/corehost"), "")
+)
 
 $arch          = $RID.Split('-')[1]
 $configuration = $Configuration
@@ -153,19 +175,6 @@ if (Is-OS($Windows)) {
 
 $version       = "0.0"
 $buildhash     = "00000000"
-$pportable     = ""
-$pcrossbuild   = ""
-$pstripsymbols = ""
-
-if ($Portable) {
-    $pportable = "-portablebuild"
-}
-if ($Cross) {
-    $pcrossbuild = "-cross"
-}
-if ($Stripsymbols) {
-    $pstripsymbols = "-stripsymbols"
-}
 
 if (!(Test-Path $artifactsdir)) {
     mkdir -p $artifactsdir >$null 2>$null
@@ -192,13 +201,17 @@ if (Test-Path("${scriptdir}/VersionReleased.json")) {
 [System.Collections.ArrayList]$tags = @()
 
 # 全新编译
-# $versionBuilt = @()
+$versionBuilt = @()
 
 # 版本过滤
 foreach ($tag in (git tag))
 {
-    # 只编译5.x以及6.x
-    if (($tag -like "v5*") -or ($tag -like "v6*")) {
+    # 只编译2.x+版本
+    if (($tag -like "v2*") -or ($tag -like "v3*") -or ($tag -like "v5*") -or ($tag -like "v6*")) {
+        # 2.x版本只编译正式版
+        if (($tag -like "v2*") -and ($tag -match "[^v\d\.]")) {
+            continue
+        }
         $version = $tag
         if ($versionMap.$tag) {
             $version = $versionMap.$tag
@@ -215,8 +228,8 @@ foreach ($tag in (git tag))
 # DO NOT DELETE THIS LINE
 
 # 自定义版本编译
-# $tags = @()
-# [void]$tags.Add("v5.0.0")
+$tags = @()
+[void]$tags.Add("v5.0.0")
 
 # 去重
 [System.Collections.ArrayList]$tmp = @()
@@ -246,6 +259,39 @@ foreach ($tag in $tags)
         continue
     }
 
+    # is core-setup repo or runtime repo
+    $oldRepo = $false
+
+    if (($tag -like "v2*") -or ($tag -like "v3*")) {
+        $oldRepo = $true
+    }
+
+    $pportable     = ""
+    $pcrossbuild   = ""
+    $pstripsymbols = ""
+
+    if ($Portable) {
+        if ($oldRepo) {
+            $pportable = "portable"
+        } else {
+            $pportable = "-portablebuild"
+        }
+    }
+    if ($Cross) {
+        if ($oldRepo) {
+            $pcrossbuild = "--cross"
+        } else {
+            $pcrossbuild = "-cross"
+        }
+    }
+    if ($Stripsymbols) {
+        if ($oldRepo) {
+            $pstripsymbols = "--stripsymbols"
+        } else {
+            $pstripsymbols = "-stripsymbols"
+        }
+    }
+
     cd $rootdir
 
     $bindir = "${artifactsdir}/${version}/${rid}.${configuration}"
@@ -259,12 +305,15 @@ foreach ($tag in $tags)
 
     git reset --hard $tag >$null 2>$null
 
-    if (Test-Path "${workdir1}/CMakeLists.txt") {
-        $workdir = $workdir1
-        $clidir  = $clidir1
-    } elseif (Test-Path "${workdir2}/CMakeLists.txt") {
-        $workdir = $workdir2
-        $clidir  = $clidir2
+    foreach ($_ in $workdirs)
+    {
+        $_[1] = Format-Path($_ -Join "/")
+
+        if (Test-Path "$($_[1])/runtime_config.cpp") {
+            $workdir = $_[0]
+            $clidir  = $_[1]
+            break
+        }
     }
 
     Fix-Patch
@@ -275,13 +324,14 @@ foreach ($tag in $tags)
     $longcommit = (git rev-parse HEAD)
     $buildhash  = $commithash
 
-    [System.Collections.ArrayList]$libPaths = @()
+    $libPaths = (
+        "${workdir}/cli/fxr/${hostfxr}",
+        "${rootdir}/bin/${rid}.${configuration}/corehost/${hostfxr}",
+        "${rootdir}/artifacts/bin/${rid}.${configuration}/corehost/${hostfxr}",
+        "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/${configuration}/${hostfxr}",
+        "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/Release/${hostfxr}"
+    )
     $libPath = ""
-    [void]$libPaths.Add("${workdir}/cli/fxr/${hostfxr}")
-    [void]$libPaths.Add("${rootdir}/bin/${rid}.${configuration}/corehost/${hostfxr}")
-    [void]$libPaths.Add("${rootdir}/artifacts/bin/${rid}.${configuration}/corehost/${hostfxr}")
-    [void]$libPaths.Add("${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/${configuration}/${hostfxr}")
-    [void]$libPaths.Add("${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/Release/${hostfxr}")
 
     foreach ($path in $libPaths)
     {
@@ -307,25 +357,33 @@ Args: ${pportable} ${pcrossbuild} ${pstripsymbols}"
 
     if (Is-OS($Windows)) {
         Write-VersionInfo
-        powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} rid ${RID} rootDir ${rootdir}
+        if ($oldRepo) {
+            powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} ${pportable} rid ${RID}
+        } else {
+            powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} rid ${RID} rootDir ${rootdir}
+        }
     } else {
         Fix-CMake-Version-Detect
 
-        # Fix Missing CMake Args
-        $needCMakeArgsVersions = "v5.0.0-preview.1.20120.5", "v5.0.0-preview.2.20160.6"
-        $cmakeargs = ""
-        if ($needCMakeArgsVersions.Contains($version)) {
-            if ($arch -eq "arm") {
-                $cmakeargs = "-DCLR_CMAKE_TARGET_ARCH_ARM=1"
-            } elseif ($arch -eq "arm64") {
-                $cmakeargs = "-DCLR_CMAKE_TARGET_ARCH_ARM64=1"
-            }
-        }
-
-        if ($cmakeargs) {
-            bash $workdir/build.sh -${configuration} -${arch} -hostver ${version} -apphostver ${version} -fxrver ${version} -policyver ${version} -commithash ${buildhash} /p:CheckEolTargetFramework=False -cmakeargs $cmakeargs
+        if ($oldRepo) {
+            bash $workdir/build.sh --configuration ${configuration} --arch ${arch} --hostver ${version} --apphostver ${version} --fxrver ${version} --policyver ${version} --commithash ${buildhash} -${pportable} ${pcrossbuild} ${pstripsymbols}
         } else {
-            bash $workdir/build.sh -${configuration} -${arch} -hostver ${version} -apphostver ${version} -fxrver ${version} -policyver ${version} -commithash ${buildhash} /p:CheckEolTargetFramework=False
+            # Fix Missing CMake Args
+            $needCMakeArgsVersions = "v5.0.0-preview.1.20120.5", "v5.0.0-preview.2.20160.6"
+            $cmakeargs = ""
+            if ($needCMakeArgsVersions.Contains($version)) {
+                if ($arch -eq "arm") {
+                    $cmakeargs = "-DCLR_CMAKE_TARGET_ARCH_ARM=1"
+                } elseif ($arch -eq "arm64") {
+                    $cmakeargs = "-DCLR_CMAKE_TARGET_ARCH_ARM64=1"
+                }
+            }
+
+            if ($cmakeargs) {
+                bash $workdir/build.sh -${configuration} -${arch} -hostver ${version} -apphostver ${version} -fxrver ${version} -policyver ${version} -commithash ${buildhash} /p:CheckEolTargetFramework=False -cmakeargs $cmakeargs
+            } else {
+                bash $workdir/build.sh -${configuration} -${arch} -hostver ${version} -apphostver ${version} -fxrver ${version} -policyver ${version} -commithash ${buildhash} /p:CheckEolTargetFramework=False
+            }
         }
     }
 
