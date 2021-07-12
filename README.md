@@ -1,22 +1,89 @@
 # HostFXRPatcher
 
-## 编译流程
-1.  拉取最新HostFXRPatcher
-2.  拉取最新core-setup
-3.  切换至HostFXRPatcher/patcher分支
-4.  运行updateVersionReleases.ps1更新VersionReleased.json
-5.  对比VersionReleased.json与VersionBuilt.json
-6.  找出缺失的Version并编译
-7.  更新VersionReleased.json与VersionBuilt.json
-8.  推送HostFXRPatcher/patcher分支
-9.  切换至HostFXRPatcher/master分支
-10. 运行checkMissingArtifacts.ps1找出缺失的Arch编译
-11. build缺失的特定版本的特定Arch
-12. 运行autoUpdateArtifacts.ps1自动更新ArtifactsVersion
-13. 推送HostFXRPatcher/master分支
+## Environment Requirements
+1. Hosting System (Windows/Linux(WSL works too)/MacOS)
+2. PowerShell 7
+3. Visual Studio 2017 (Windows Only)
+4. Visual Studio 2019 (Windows Only)
+5. Basic build environment by [this guide](https://github.com/dotnet/runtime/blob/main/docs/workflow/README.md)
 
-## 特殊
-1.  更新runtime.compatibility.json（从URL拉取最新数据并更新，可自动），位于HostFXRPatcher/master/artifacts/runtime.compatibility.json
-2.  更新runtime.supported.json（基本不会更新，除非加入新的Arch支持），位于HostFXRPatcher/master/artifacts/runtime.supported.json
-3.  ArtifactsVersion现已自动管理，不再需要配人为操作
-4.  更新VersionMapping.json（用于解决core-setup的tag与version不统一的情况），位于HostFXRPatcher/patcher/Patcher/VersionMapping.json
+## Clone Or Update The `core-setup`/`runtime` Repo
+
+`core-setup` repo is for `.NET Core 2.x` and `.NET Core 3.x`, and `runtime` repo is for `.NET 5` and `.NET 6`.
+```shell
+git clone https://github.com/dotnet/core-setup.git
+git clone https://github.com/dotnet/runtime.git
+```
+
+## Fork And Clone This `HostFXRPatcher` Repo And Switch To `Patcher` Branch To Get The Build Scripts
+
+**FORK FIRST PLEASE!**
+
+```shell
+git clone https://github.com/<YOU>/HostFXRPatcher.git
+git checkout Patcher
+```
+
+## Copy The Build Scripts Into `core-setup`/`runtime` Repo
+
+```shell
+cp <HostFXRPatcher repo>/HostFXRPatcher/ <core-setup/runtime repo>
+```
+
+## Fetch The Latest Release Versions
+
+```shell
+cd <core-setup/runtime repo>/HostFXRPatcher/
+pwsh ./updateVersionReleases.ps1
+```
+
+## Building
+There are two ways to build the `hostfxr` depending on which versions you need to build.
+
+### Usage
+
+```shell
+pwsh ./buildPatch.ps1 -rid <RID> -configuration <Configuration=Debug|Release> [-portable] [-cross] [-stripsymbols]
+```
+
+### Building All The Versions
+Just delete the `VersionBuilt.json` that is under the `HostFXRPatcher` folder.
+
+```shell
+cd <core-setup/runtime repo>/HostFXRPatcher/
+rm VersionBuilt.json
+pwsh ./buildPatch.ps1
+```
+
+### Building The Missing Versions
+Modify the `buildPatch.ps1` script and uncomment line 231-234 and add any verisons that you want to build, then run the build script.
+
+```powershell
+# 自定义版本编译
+$tags = @()
+[void]$tags.Add("v2.2.0")
+[void]$tags.Add("v3.0.0")
+[void]$tags.Add("v5.0.0")
+```
+
+```shell
+cd <core-setup/runtime repo>/HostFXRPatcher/
+pwsh ./buildPatch.ps1
+```
+
+## Get The Artifacts
+When the build is done, all the artifacts are copied to the `artifacts-patched` folder.
+
+## Make You Own `HostFXRPatcher` Repo
+**NetCoreBeauty DOES NOT ACCEPT ANY ARTIFACTS PR**
+
+Copy all the artifacts into the `HostFXRPatcher` repo(`artifacts` folder), but switch back to `master` branch first please, and then run the `autoUpdateArtifacts.ps1`. Finally, push the update.
+```shell
+cp <HostFXRPatcher repo>/
+pwsh ./autoUpdateArtifacts.ps1
+git commit -m "Update Versions"
+git push
+```
+
+## Use You Own `HostFXRPatcher` Patch In NetCoreBeauty
+Just [setting the mirror](https://github.com/nulastudio/netcorebeauty#mirror) and republish your project.
