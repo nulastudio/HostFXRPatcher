@@ -331,7 +331,8 @@ foreach ($tag in $tags)
         "${rootdir}/bin/${rid}.${configuration}/corehost/${hostfxr}",
         "${rootdir}/artifacts/bin/${rid}.${configuration}/corehost/${hostfxr}",
         "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/${configuration}/${hostfxr}",
-        "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/Release/${hostfxr}"
+        "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/Release/${hostfxr}",
+        "${rootdir}/artifacts/bin/osx.10.12-${arch}.${configuration}/corehost/${hostfxr}"
     )
     $libPath = ""
 
@@ -428,5 +429,9 @@ Args: ${pportable} ${pcrossbuild} ${pstripsymbols}"
 }
 
 cd ${rootdir}
+
+Write-Message "Cleaning Up"
+
+git reset --hard HEAD >$null 2>$null
 
 Write-Message "所有版本编译完成"
