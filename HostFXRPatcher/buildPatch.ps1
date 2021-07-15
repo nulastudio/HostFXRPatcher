@@ -78,6 +78,20 @@ function Fix-CMake-Version-Detect {
     $content | Out-File ${rootdir}/eng/native/build-commons.sh
 }
 
+function Fix-Target-Rid-Catching {
+    if (!(Test-Path "${workdir}/build.sh")) {
+        return
+    }
+
+    $content = Get-Content -Raw -Path ${workdir}/build.sh
+    $content = $content + "
+if [ `"`$__base_rid`" != `"`" ]; then
+    echo `"`$__base_rid`" > ${rootdir}/TARGET_RID
+fi
+"
+    $content.Replace("`r`n", "`n") | Out-File ${workdir}/build.sh
+}
+
 function Fix-Patch {
     Write-Message "Patching"
 
@@ -330,13 +344,12 @@ foreach ($tag in $tags)
     $longcommit = (git rev-parse HEAD)
     $buildhash  = $commithash
 
-    $libPaths = (
+    [System.Collections.ArrayList]$libPaths = @(
         "${workdir}/cli/fxr/${hostfxr}",
         "${rootdir}/bin/${rid}.${configuration}/corehost/${hostfxr}",
         "${rootdir}/artifacts/bin/${rid}.${configuration}/corehost/${hostfxr}",
         "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/${configuration}/${hostfxr}",
-        "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/Release/${hostfxr}",
-        "${rootdir}/artifacts/bin/osx.10.12-${arch}.${configuration}/corehost/${hostfxr}"
+        "${rootdir}/Bin/obj/${rid}.${configuration}/corehost/cli/fxr/Release/${hostfxr}"
     )
     $libPath = ""
 
@@ -371,6 +384,7 @@ Args: ${pportable} ${pcrossbuild} ${pstripsymbols}"
         }
     } else {
         Fix-CMake-Version-Detect
+        Fix-Target-Rid-Catching
 
         if ($oldRepo) {
             bash $workdir/build.sh --configuration ${configuration} --arch ${arch} --hostver ${version} --apphostver ${version} --fxrver ${version} --policyver ${version} --commithash ${buildhash} ${pportable} ${pcrossbuild} ${pstripsymbols}
@@ -392,6 +406,23 @@ Args: ${pportable} ${pcrossbuild} ${pstripsymbols}"
                 bash $workdir/build.sh -${configuration} -${arch} -hostver ${version} -apphostver ${version} -fxrver ${version} -policyver ${version} -commithash ${buildhash} /p:CheckEolTargetFramework=False
             }
         }
+    }
+
+    # Additional Lib Paths
+    if ((Test-Path ${rootdir}/TARGET_RID)) {
+        $target_rid = Get-Content -Raw -Path ${rootdir}/TARGET_RID
+        $target_rid = $target_rid.Trim()
+
+        [System.Collections.ArrayList]$additionalLibPaths = @()
+
+        foreach ($path in $libPaths)
+        {
+            [void]$additionalLibPaths.Add($path.Replace($rid, $target_rid))
+        }
+
+        [void]$libPaths.AddRange($additionalLibPaths)
+
+        rm ${rootdir}/TARGET_RID
     }
 
     foreach ($path in $libPaths)
