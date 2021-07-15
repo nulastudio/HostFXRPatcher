@@ -274,7 +274,11 @@ foreach ($tag in $tags)
 
     if ($Portable) {
         if ($oldRepo) {
-            $pportable = "portable"
+            if ($platform -eq "windows") {
+                $pportable = "portable"
+            } else {
+                $pportable = "-portable"
+            }
         } else {
             $pportable = "-portablebuild"
         }
@@ -369,7 +373,7 @@ Args: ${pportable} ${pcrossbuild} ${pstripsymbols}"
         Fix-CMake-Version-Detect
 
         if ($oldRepo) {
-            bash $workdir/build.sh --configuration ${configuration} --arch ${arch} --hostver ${version} --apphostver ${version} --fxrver ${version} --policyver ${version} --commithash ${buildhash} -${pportable} ${pcrossbuild} ${pstripsymbols}
+            bash $workdir/build.sh --configuration ${configuration} --arch ${arch} --hostver ${version} --apphostver ${version} --fxrver ${version} --policyver ${version} --commithash ${buildhash} ${pportable} ${pcrossbuild} ${pstripsymbols}
         } else {
             # Fix Missing CMake Args
             $needCMakeArgsVersions = "v5.0.0-preview.1.20120.5", "v5.0.0-preview.2.20160.6"
