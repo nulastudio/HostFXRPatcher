@@ -52,7 +52,13 @@ Just delete the `VersionBuilt.json` that is under the `HostFXRPatcher` folder.
 ```shell
 cd <core-setup/runtime repo>/HostFXRPatcher/
 rm VersionBuilt.json
-pwsh ./buildPatch.ps1
+
+pwsh ./buildPatch.ps1 -rid win-x64 -configuration Release -portable -stripsymbols
+pwsh ./buildPatch.ps1 -rid win-x86 -configuration Release -portable -stripsymbols
+pwsh ./buildPatch.ps1 -rid linux-x64 -configuration Release -portable -stripsymbols
+pwsh ./buildPatch.ps1 -rid osx-x64 -configuration Release -portable -stripsymbols
+ROOTFS_DIR=/home/cross/arm pwsh ./buildPatch.ps1 -rid linux-arm -configuration Release -portable -stripsymbols -cross
+ROOTFS_DIR=/home/cross/arm64 pwsh ./buildPatch.ps1 -rid linux-arm64 -configuration Release -portable -stripsymbols -cross
 ```
 
 ### Building The Missing Versions
