@@ -18,7 +18,7 @@ function Sort-Dict($Dict) {
     return $hashtable
 }
 
-$compatibilityJsonUrl = "https://raw.githubusercontent.com/dotnet/runtime/master/src/libraries/pkg/Microsoft.NETCore.Platforms/runtime.compatibility.json"
+$compatibilityJsonUrl = "https://raw.githubusercontent.com/dotnet/runtime/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.compatibility.json"
 
 $compatibilityJson = (Get-NetworkString $compatibilityJsonUrl) | ConvertFrom-Json
 $supportedJson = (Get-Content $supportedpath) | ConvertFrom-Json
