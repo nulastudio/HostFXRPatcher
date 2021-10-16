@@ -1,5 +1,5 @@
 {
-  "runtime/compatibility": "4",
+  "runtime/compatibility": "5",
   "runtime/supported": "5",
   "v2.0.0/linux-arm": "0",
   "v2.0.0/linux-arm64": "0",
