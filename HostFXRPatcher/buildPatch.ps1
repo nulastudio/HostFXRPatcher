@@ -78,6 +78,16 @@ function Fix-CMake-Version-Detect {
     $content | Out-File ${rootdir}/eng/native/build-commons.sh
 }
 
+function Fix-CMake-Cache-Detect {
+    if (!(Test-Path "${rootdir}/eng/native/gen-buildsys.sh")) {
+        return
+    }
+
+    $content = Get-Content -Raw -Path ${rootdir}/eng/native/gen-buildsys.sh
+    $content = $content.Replace('if [[ "$cmake_args_cache" == "$cmake_args_to_cache" ]]; then', 'if [[ "1" == "2" ]]; then')
+    $content | Out-File ${rootdir}/eng/native/gen-buildsys.sh
+}
+
 function Fix-Target-Rid-Catching {
     if (!(Test-Path "${workdir}/build.sh")) {
         return
@@ -384,6 +394,7 @@ Args: ${pportable} ${pcrossbuild} ${pstripsymbols}"
         }
     } else {
         Fix-CMake-Version-Detect
+        Fix-CMake-Cache-Detect
         Fix-Target-Rid-Catching
 
         if ($oldRepo) {
