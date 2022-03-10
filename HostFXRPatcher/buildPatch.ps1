@@ -324,6 +324,8 @@ foreach ($tag in $tags)
 
     cd $rootdir
 
+    rm -rf artifacts
+
     $bindir = "${artifactsdir}/${version}/${rid}.${configuration}"
     if (!(Test-Path $bindir)) {
         mkdir -p $bindir >$null 2>$null
@@ -337,11 +339,13 @@ foreach ($tag in $tags)
 
     foreach ($_ in $workdirs)
     {
-        $_[1] = Format-Path($_ -Join "/")
+        $absworkdir = $_[0]
+        $absclidir = Format-Path($_ -Join "/")
 
-        if (Test-Path "$($_[1])/runtime_config.cpp") {
-            $workdir = $_[0]
-            $clidir  = $_[1]
+        if (Test-Path "${absclidir}/runtime_config.cpp") {
+            $workdir = $absworkdir
+            $clidir  = $absclidir
+
             break
         }
     }
@@ -412,9 +416,9 @@ Args: ${pportable} ${pcrossbuild} ${pstripsymbols}"
             }
 
             if ($cmakeargs) {
-                bash $workdir/build.sh -${configuration} -${arch} -hostver ${version} -apphostver ${version} -fxrver ${version} -policyver ${version} -commithash ${buildhash} /p:CheckEolTargetFramework=False -cmakeargs $cmakeargs
+                bash $workdir/build.sh -${configuration} -${arch} -hostver ${version} -apphostver ${version} -fxrver ${version} -policyver ${version} -commithash ${buildhash} /p:CheckEolTargetFramework=False -cmakeargs $cmakeargs ${pcrossbuild}
             } else {
-                bash $workdir/build.sh -${configuration} -${arch} -hostver ${version} -apphostver ${version} -fxrver ${version} -policyver ${version} -commithash ${buildhash} /p:CheckEolTargetFramework=False
+                bash $workdir/build.sh -${configuration} -${arch} -hostver ${version} -apphostver ${version} -fxrver ${version} -policyver ${version} -commithash ${buildhash} /p:CheckEolTargetFramework=False ${pcrossbuild}
             }
         }
     }
@@ -464,12 +468,12 @@ Args: ${pportable} ${pcrossbuild} ${pstripsymbols}"
 
     cd ${rootdir}
 
-    dir -r "CMakeCache.txt" | ForEach-Object {
-        rm $_
-    }
-    dir -r "CMakeLists.txt" | ForEach-Object {
-        rm $_
-    }
+    # dir -r "CMakeCache.txt" | ForEach-Object {
+    #     rm $_
+    # }
+    # dir -r "CMakeLists.txt" | ForEach-Object {
+    #     rm $_
+    # }
 
     cd ${workdir}
 }
