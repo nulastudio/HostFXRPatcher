@@ -324,7 +324,9 @@ foreach ($tag in $tags)
 
     cd $rootdir
 
-    rm -rf artifacts
+    if (Test-Path artifacts) {
+        Remove-Item -Recurse -Force artifacts
+    }
 
     $bindir = "${artifactsdir}/${version}/${rid}.${configuration}"
     if (!(Test-Path $bindir)) {
