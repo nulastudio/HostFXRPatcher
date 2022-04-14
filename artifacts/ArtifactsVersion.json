@@ -804,5 +804,11 @@
   "v7.0.0-preview.2.22152.2/linux-x64": "0",
   "v7.0.0-preview.2.22152.2/osx-x64": "0",
   "v7.0.0-preview.2.22152.2/win-x64": "0",
-  "v7.0.0-preview.2.22152.2/win-x86": "0"
+  "v7.0.0-preview.2.22152.2/win-x86": "0",
+  "v7.0.0-preview.3.22175.4/linux-arm": "0",
+  "v7.0.0-preview.3.22175.4/linux-arm64": "0",
+  "v7.0.0-preview.3.22175.4/linux-x64": "0",
+  "v7.0.0-preview.3.22175.4/osx-x64": "0",
+  "v7.0.0-preview.3.22175.4/win-x64": "0",
+  "v7.0.0-preview.3.22175.4/win-x86": "0"
 }
