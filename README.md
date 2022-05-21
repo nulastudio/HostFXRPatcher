@@ -98,4 +98,4 @@ git push
 ```
 
 ## Use You Own `HostFXRPatcher` Patch In NetCoreBeauty
-Just [setting the mirror](https://github.com/nulastudio/netcorebeauty#mirror) and republish your project.
+Just [setting the mirror](https://github.com/nulastudio/NetBeauty2/tree/v1#mirror) and republish your project.
