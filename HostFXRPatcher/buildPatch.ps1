@@ -88,6 +88,16 @@ function Fix-CMake-Cache-Detect {
     $content | Out-File ${rootdir}/eng/native/gen-buildsys.sh
 }
 
+function Check-If-Need-OutputRid {
+    if (!(Test-Path "${workdir}/build.cmd")) {
+        return $False
+    }
+
+    $content = Get-Content -Raw -Path ${workdir}/build.cmd
+
+    return $content.Contains("outputrid")
+}
+
 function Fix-Target-Rid-Catching {
     if (!(Test-Path "${workdir}/build.sh")) {
         return
@@ -231,7 +241,7 @@ if (Test-Path("${scriptdir}/VersionReleased.json")) {
 foreach ($tag in (git tag))
 {
     # 只编译2.x+版本
-    if (($tag -like "v2*") -or ($tag -like "v3*") -or ($tag -like "v5*") -or ($tag -like "v6*") -or ($tag -like "v7*")) {
+    if (($tag -like "v2*") -or ($tag -like "v3*") -or ($tag -like "v5*") -or ($tag -like "v6*") -or ($tag -like "v7*") -or ($tag -like "v8*")) {
         # 2.x版本只编译正式版
         if (($tag -like "v2*") -and ($tag -match "[^v\d\.]")) {
             continue
@@ -396,7 +406,11 @@ Args: ${pportable} ${pcrossbuild} ${pstripsymbols}"
         if ($oldRepo) {
             powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} ${pportable} rid ${RID}
         } else {
-            powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} rid ${RID} rootDir ${rootdir}
+            if (Check-If-Need-OutputRid) {
+                powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} rid ${RID} rootDir ${rootdir} outputrid ${RID}
+            } else {
+                powershell $workdir/build.cmd ${configuration} ${arch} hostver ${version} apphostver ${version} fxrver ${version} policyver ${version} commit ${buildhash} rid ${RID} rootDir ${rootdir}
+            }
         }
     } else {
         Fix-CMake-Version-Detect
