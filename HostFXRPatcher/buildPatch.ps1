@@ -66,6 +66,31 @@ function Write-VersionInfo {
     $content = $content.Replace("{FILEVERSION_STR}", $FILEVERSION_STR)
     $content = $content.Replace("{LEGALCOPYRIGHT}", $LEGALCOPYRIGHT)
     $content | Out-File ${clidir}/version_info.h
+    $content | Out-File ${clidir}/_version.h
+
+    $RuntimeAssemblyMajorVersion = "0"
+    $RuntimeAssemblyMinorVersion = "0"
+    $RuntimeFileMajorVersion = "0"
+    $RuntimeFileMinorVersion = "0"
+    $RuntimeFileBuildVersion = "0"
+    $RuntimeFileRevisionVersion = "0"
+    $RuntimeProductMajorVersion = "0"
+    $RuntimeProductMinorVersion = "0"
+    $RuntimeProductPatchVersion = "0"
+    $RuntimeProductVersion = "0"
+
+    $content = Get-Content -Raw -Path ${scriptdir}/runtime_version.h
+    $content = $content.Replace("{RuntimeAssemblyMajorVersion}", $RuntimeAssemblyMajorVersion)
+    $content = $content.Replace("{RuntimeAssemblyMinorVersion}", $RuntimeAssemblyMinorVersion)
+    $content = $content.Replace("{RuntimeFileMajorVersion}", $RuntimeFileMajorVersion)
+    $content = $content.Replace("{RuntimeFileMinorVersion}", $RuntimeFileMinorVersion)
+    $content = $content.Replace("{RuntimeFileBuildVersion}", $RuntimeFileBuildVersion)
+    $content = $content.Replace("{RuntimeFileRevisionVersion}", $RuntimeFileRevisionVersion)
+    $content = $content.Replace("{RuntimeProductMajorVersion}", $RuntimeProductMajorVersion)
+    $content = $content.Replace("{RuntimeProductMinorVersion}", $RuntimeProductMinorVersion)
+    $content = $content.Replace("{RuntimeProductPatchVersion}", $RuntimeProductPatchVersion)
+    $content = $content.Replace("{RuntimeProductVersion}", $RuntimeProductVersion)
+    $content | Out-File ${clidir}/runtime_version.h
 }
 
 function Fix-CMake-Version-Detect {
