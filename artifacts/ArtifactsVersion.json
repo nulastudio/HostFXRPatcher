@@ -1,6 +1,6 @@
 {
-  "runtime/compatibility": "5",
-  "runtime/supported": "5",
+  "runtime/compatibility": "6",
+  "runtime/supported": "6",
   "v2.0.0/linux-arm": "0",
   "v2.0.0/linux-arm64": "0",
   "v2.0.0/linux-x64": "1",
@@ -928,6 +928,7 @@
   "v6.0.26/linux-arm": "0",
   "v6.0.26/linux-arm64": "0",
   "v6.0.26/linux-x64": "0",
+  "v6.0.26/osx-arm64": "0",
   "v6.0.26/osx-x64": "0",
   "v6.0.26/win-x64": "0",
   "v6.0.26/win-x86": "0",
