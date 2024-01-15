@@ -12,7 +12,23 @@ $arches = (Get-Content "${artifactsdir}/runtime.supported.json") | ConvertFrom-J
 function Check-Arch($path) {
     $segment = $path.Split("/")
     $version = $segment[($segment.Count - 1)]
+
     foreach ($arch in $arches) {
+        if ($arch -eq "osx-arm64") {
+            if ($version -match "^v1") {
+                continue
+            }
+            if ($version -match "^v2") {
+                continue
+            }
+            if ($version -match "^v3") {
+                continue
+            }
+            if ($version -match "^v5") {
+                continue
+            }
+        }
+
         if (!(Test-Path "${path}/${arch}.Release") -or !(Get-ChildItem "${path}/${arch}.Release").Length) {
             Write-Host "${version} does not contain arch ${arch}"
         }
