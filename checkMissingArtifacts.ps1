@@ -14,7 +14,20 @@ function Check-Arch($path) {
     $version = $segment[($segment.Count - 1)]
 
     foreach ($arch in $arches) {
-        if ($arch -eq "osx-arm64") {
+        if ($arch -eq "win-arm64") {
+            if ($version -match "^v1") {
+                continue
+            }
+            if ($version -match "^v2") {
+                continue
+            }
+            if ($version -match "^v3") {
+                continue
+            }
+            if ($version -match "^v5") {
+                continue
+            }
+        } elseif ($arch -eq "osx-arm64") {
             if ($version -match "^v1") {
                 continue
             }
