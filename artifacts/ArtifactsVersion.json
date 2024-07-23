@@ -1495,12 +1495,12 @@
   "v9.0.0-preview.5.24306.7/win-arm64": "0",
   "v9.0.0-preview.5.24306.7/win-x64": "0",
   "v9.0.0-preview.5.24306.7/win-x86": "0",
-  "v9.0.0-preview.6.24327.7/linux-arm": "0",
-  "v9.0.0-preview.6.24327.7/linux-arm64": "0",
-  "v9.0.0-preview.6.24327.7/linux-x64": "0",
-  "v9.0.0-preview.6.24327.7/osx-arm64": "0",
-  "v9.0.0-preview.6.24327.7/osx-x64": "0",
-  "v9.0.0-preview.6.24327.7/win-arm64": "0",
-  "v9.0.0-preview.6.24327.7/win-x64": "0",
-  "v9.0.0-preview.6.24327.7/win-x86": "0"
+  "v9.0.0-preview.6.24327.7/linux-arm": "1",
+  "v9.0.0-preview.6.24327.7/linux-arm64": "1",
+  "v9.0.0-preview.6.24327.7/linux-x64": "1",
+  "v9.0.0-preview.6.24327.7/osx-arm64": "1",
+  "v9.0.0-preview.6.24327.7/osx-x64": "1",
+  "v9.0.0-preview.6.24327.7/win-arm64": "1",
+  "v9.0.0-preview.6.24327.7/win-x64": "1",
+  "v9.0.0-preview.6.24327.7/win-x86": "1"
 }
