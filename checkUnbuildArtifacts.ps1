@@ -26,7 +26,7 @@ $releasesIndex = (Get-NetworkString $releasesIndexUrl) | ConvertFrom-Json
 
 foreach ($releaseIndex in $releasesIndex."releases-index") {
     # 不需要1.x版本
-    if ($releaseIndex."channel-version" -match "^1") {
+    if ($releaseIndex."channel-version" -match "^1\.") {
         continue
     }
     $releaseJsonUrl = $releaseIndex."releases.json"
@@ -44,7 +44,7 @@ foreach ($releaseIndex in $releasesIndex."releases-index") {
                 $runtimeVersion = $release."runtime"."version"
             }
             # 2.x版本只需要正式版
-            if (($runtimeVersion -match "^2") -and ($runtimeVersion -match "[^\d\.]")) {
+            if (($runtimeVersion -match "^2\.") -and ($runtimeVersion -match "[^\d\.]")) {
                 continue
             }
             $runtimeVersion = "v${runtimeVersion}"
