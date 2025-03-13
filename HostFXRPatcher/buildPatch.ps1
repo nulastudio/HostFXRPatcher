@@ -266,7 +266,7 @@ if (Test-Path("${scriptdir}/VersionReleased.json")) {
 foreach ($tag in (git tag))
 {
     # 只编译2.x+版本
-    if (($tag -like "v2*") -or ($tag -like "v3*") -or ($tag -like "v5*") -or ($tag -like "v6*") -or ($tag -like "v7*") -or ($tag -like "v8*") -or ($tag -like "v9*")) {
+    if (($tag -like "v2*") -or ($tag -like "v3*") -or ($tag -like "v5*") -or ($tag -like "v6*") -or ($tag -like "v7*") -or ($tag -like "v8*") -or ($tag -like "v9*") -or ($tag -like "v10*")) {
         # 2.x版本只编译正式版
         if (($tag -like "v2*") -and ($tag -match "[^v\d\.]")) {
             continue
