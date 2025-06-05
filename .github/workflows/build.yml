@@ -15,8 +15,8 @@ jobs:
         with:
           ref: Patcher
       - run: |
+          git config --system core.longpaths true
           git clone https://github.com/dotnet/runtime.git
-          bash ./runtime/eng/common/native/install-dependencies.sh
           cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
           cd ./runtime/HostFXRPatcher/
           pwsh ./updateVersionReleases.ps1
