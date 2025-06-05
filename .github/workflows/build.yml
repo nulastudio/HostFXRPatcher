@@ -18,5 +18,5 @@ jobs:
           sudo xcode-select --switch /Applications/Xcode_14.3.1.app/Contents/Developer
           ls -al ./
           mkdir runtime
-          cp -r ./HostFXRPatcher/ ./runtime
+          cp -r ./HostFXRPatcher/ ./runtime/
           ls -al ./runtime/
