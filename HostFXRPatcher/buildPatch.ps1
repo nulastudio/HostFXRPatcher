@@ -2,6 +2,7 @@ param
 (
     $RID,
     $Configuration,
+    $Versions,
     [switch]$Portable,
     [switch]$Cross,
     [switch]$Stripsymbols
@@ -35,7 +36,7 @@ function Format-Path($path)
 function Print-Usage
 {
     Write-Host "Usage:"
-    Write-Host "-rid <RID> -configuration <Configuration=Debug|Release> [-portable] [-cross] [-stripsymbols]"
+    Write-Host "-rid <RID> -configuration <Configuration=Debug|Release> -versions <Versions> [-portable] [-cross] [-stripsymbols]"
 }
 
 function Check-Arguments
@@ -261,6 +262,18 @@ if (Test-Path("${scriptdir}/VersionReleased.json")) {
 
 # 全新编译
 # $versionBuilt = @()
+
+if ($Versions) {
+    if ($Versions -eq "all") {
+        $versionBuilt = @()
+    } else {
+        $tags = @()
+
+        foreach ($v in $Versions.Split(',')) {
+            [void]$tags.Add($v)
+        }
+    }
+}
 
 # 版本过滤
 foreach ($tag in (git tag))
