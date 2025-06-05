@@ -16,7 +16,7 @@ jobs:
           ref: Patcher
       - run: |
           git clone https://github.com/dotnet/runtime.git
-          bash ./runtime/eng/common/native/install-dependencies.sh
+          sudo bash ./runtime/eng/common/native/install-dependencies.sh
           cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
           cd ./runtime/HostFXRPatcher/
           pwsh ./updateVersionReleases.ps1
