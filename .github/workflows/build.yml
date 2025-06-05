@@ -22,3 +22,7 @@ jobs:
           cd ./runtime/HostFXRPatcher/
           pwsh ./updateVersionReleases.ps1
           pwsh ./buildPatch.ps1 -rid osx-x64 -configuration Release -versions "v9.0.0" -portable -stripsymbols
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patched-hostfxr
+          path: runtime/artifacts-patched
