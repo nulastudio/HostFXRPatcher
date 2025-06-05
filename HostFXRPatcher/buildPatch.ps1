@@ -263,16 +263,8 @@ if (Test-Path("${scriptdir}/VersionReleased.json")) {
 # 全新编译
 # $versionBuilt = @()
 
-if ($Versions) {
-    if ($Versions -eq "all") {
-        $versionBuilt = @()
-    } else {
-        $tags = @()
-
-        foreach ($v in $Versions.Split(',')) {
-            [void]$tags.Add($v)
-        }
-    }
+if ($Versions -and ($Versions -eq "all")) {
+    $versionBuilt = @()
 }
 
 # 版本过滤
@@ -298,6 +290,14 @@ foreach ($tag in (git tag))
 # 增量编译
 # 每次发布新版本之后在这里写
 # DO NOT DELETE THIS LINE
+
+if ($Versions -and ($Versions -ne "all")) {
+    $tags = @()
+
+    foreach ($v in $Versions.Split(',')) {
+        [void]$tags.Add($v)
+    }
+}
 
 # 自定义版本编译
 # $tags = @()
