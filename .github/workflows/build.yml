@@ -16,7 +16,9 @@ jobs:
           ref: Patcher
       - run: |
           sudo xcode-select --switch /Applications/Xcode_14.3.1.app/Contents/Developer
-          ls -al ./
-          mkdir runtime
-          cp -r ./HostFXRPatcher/ ./runtime/
-          ls -al ./runtime/
+          git clone https://github.com/dotnet/runtime.git
+          bash ./runtime/eng/common/native/install-dependencies.sh
+          cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
+          cd ./runtime/HostFXRPatcher/
+          pwsh ./updateVersionReleases.ps1
+          rm VersionBuilt.json
