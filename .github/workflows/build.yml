@@ -11,5 +11,15 @@ jobs:
     name: Build OSX Artifacts
     runs-on: macos-13
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Patcher
       - run: |
-          pwsh --version
+          sudo xcode-select --switch /Applications/Xcode_14.3.1.app/Contents/Developer
+          git clone https://github.com/dotnet/runtime.git
+          bash ./runtime/eng/common/native/install-dependencies.sh
+          cp -r ./HostFXRPatcher/ ./runtime/
+          cd ./runtime/HostFXRPatcher/
+          pwsh ./updateVersionReleases.ps1
+          rm VersionBuilt.json
+          pwsh ./buildPatch.ps1 -rid osx-x64 -configuration Release -portable -stripsymbols
