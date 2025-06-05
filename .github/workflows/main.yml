@@ -1,0 +1,12 @@
+name: Build Patched HostFXR
+on:
+  schedule:
+  - cron: "0 * * * *"
+
+jobs:
+  Build-OSX-Artifacts:
+    name: Build OSX Artifacts
+    runs-on: macos-13
+    steps:
+      - run: |
+          pwsh --version
