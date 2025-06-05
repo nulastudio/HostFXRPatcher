@@ -18,11 +18,11 @@ jobs:
           git clone https://github.com/dotnet/runtime.git
           sudo bash ./runtime/eng/common/native/install-dependencies.sh
           sudo apt install -y binfmt-support debootstrap qemu qemu-user-static
-          sudo bash ./runtime/eng/common/cross/build-rootfs.sh arm bionic
+          ROOTFS_DIR=/home/cross/arm sudo bash ./runtime/eng/common/cross/build-rootfs.sh arm bionic
           cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
           cd ./runtime/HostFXRPatcher/
           pwsh ./updateVersionReleases.ps1
-          ROOTFS_DIR=$pwd/.tools/rootfs/arm pwsh ./buildPatch.ps1 -rid linux-arm -configuration Release -versions "v9.0.0" -portable -stripsymbols -cross
+          ROOTFS_DIR=/home/cross/arm pwsh ./buildPatch.ps1 -rid linux-arm -configuration Release -versions "v9.0.0" -portable -stripsymbols -cross
       - uses: actions/upload-artifact@v4
         with:
           name: patched-hostfxr_linux-arm
