@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  linux-arm:
-    name: Build linux-arm Artifacts
+  linux-arm64:
+    name: Build linux-arm64 Artifacts
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -18,12 +18,12 @@ jobs:
           git clone https://github.com/dotnet/runtime.git
           sudo bash ./runtime/eng/common/native/install-dependencies.sh
           sudo apt install -y binfmt-support debootstrap qemu qemu-user-static
-          sudo bash ./runtime/eng/common/cross/build-rootfs.sh arm bionic
+          sudo bash ./runtime/eng/common/cross/build-rootfs.sh arm64 bionic
           cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
           cd ./runtime/HostFXRPatcher/
           pwsh ./updateVersionReleases.ps1
-          ROOTFS_DIR=${{ github.workspace }}/runtime/.tools/rootfs/arm pwsh ./buildPatch.ps1 -rid linux-arm -configuration Release -versions "v9.0.0" -portable -stripsymbols -cross
+          ROOTFS_DIR=${{ github.workspace }}/runtime/.tools/rootfs/arm64 pwsh ./buildPatch.ps1 -rid linux-arm64 -configuration Release -versions "v9.0.0" -portable -stripsymbols -cross
       - uses: actions/upload-artifact@v4
         with:
-          name: patched-hostfxr_linux-arm
+          name: patched-hostfxr_linux-arm64
           path: runtime/artifacts-patched
