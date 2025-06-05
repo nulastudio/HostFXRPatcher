@@ -21,4 +21,4 @@ jobs:
           cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
           cd ./runtime/HostFXRPatcher/
           pwsh ./updateVersionReleases.ps1
-          rm VersionBuilt.json
+          pwsh ./buildPatch.ps1 -rid osx-x64 -configuration Release -versions "v9.0.0" -portable -stripsymbols
