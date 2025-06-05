@@ -18,7 +18,7 @@ jobs:
           git clone https://github.com/dotnet/runtime.git
           sudo bash ./runtime/eng/common/native/install-dependencies.sh
           sudo apt install -y binfmt-support debootstrap qemu qemu-user-static
-          sudo bash ./eng/common/cross/build-rootfs.sh arm bionic
+          sudo bash ./runtime/eng/common/cross/build-rootfs.sh arm bionic
           cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
           cd ./runtime/HostFXRPatcher/
           pwsh ./updateVersionReleases.ps1
