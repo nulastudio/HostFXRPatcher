@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  win-x64:
-    name: Build win-x64 Artifacts
+  win-x86:
+    name: Build win-x86 Artifacts
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +20,27 @@ jobs:
           cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
           cd ./runtime/HostFXRPatcher/
           pwsh ./updateVersionReleases.ps1
-          pwsh ./buildPatch.ps1 -rid win-x64 -configuration Release -versions "v9.0.0" -portable -stripsymbols
+          pwsh ./buildPatch.ps1 -rid win-x86 -configuration Release -versions "v9.0.0" -portable -stripsymbols
       - uses: actions/upload-artifact@v4
         with:
-          name: patched-hostfxr_win-x64
+          name: patched-hostfxr_win-x86
+          path: runtime/artifacts-patched
+
+  win-arm64:
+    name: Build win-arm64 Artifacts
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Patcher
+      - run: |
+          git config --system core.longpaths true
+          git clone https://github.com/dotnet/runtime.git
+          cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
+          cd ./runtime/HostFXRPatcher/
+          pwsh ./updateVersionReleases.ps1
+          pwsh ./buildPatch.ps1 -rid win-arm64 -configuration Release -versions "v9.0.0" -portable -stripsymbols -cross
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patched-hostfxr_win-arm64
           path: runtime/artifacts-patched
