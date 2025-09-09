@@ -122,6 +122,27 @@ jobs:
           name: patched-hostfxr_linux-arm64
           path: runtime/artifacts-patched
 
+  linux-loongarch64:
+    name: Build linux-loongarch64 Artifacts
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Patcher
+      - run: |
+          git clone https://github.com/dotnet/runtime.git
+          sudo bash ./runtime/eng/common/native/install-dependencies.sh
+          sudo apt install -y binfmt-support debootstrap qemu qemu-user-static
+          sudo bash ./runtime/eng/common/cross/build-rootfs.sh loongarch64 bionic
+          cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
+          cd ./runtime/HostFXRPatcher/
+          pwsh ./updateVersionReleases.ps1
+          ROOTFS_DIR=${{ github.workspace }}/runtime/.tools/rootfs/loongarch64 pwsh ./buildPatch.ps1 -rid linux-loongarch64 -configuration Release -versions ${{ vars.VERSIONS }} -portable -stripsymbols -cross
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patched-hostfxr_linux-loongarch64
+          path: runtime/artifacts-patched
+
   osx-x64:
     name: Build osx-x64 Artifacts
     runs-on: macos-13
