@@ -1,0 +1,11 @@
+name: older gcc test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  linux-older-gcc:
+    name: test older gcc
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: fawazahmed0/action-debug-vscode@main
