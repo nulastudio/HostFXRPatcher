@@ -24,6 +24,7 @@ jobs:
           sudo mkdir /opt/clang-3.9
           cd clang+llvm-3.9.0-x86_64-linux-gnu-ubuntu-16.04/
           sudo cp -r * /opt/clang-3.9/
+          cd ..
           sudo ln -s /opt/clang-3.9/bin/clang /usr/local/bin/clang
           sudo ln -s /opt/clang-3.9/bin/clang++ /usr/local/bin/clang++
           sudo ln -s /opt/clang-3.9/bin/clang /usr/bin/clang
