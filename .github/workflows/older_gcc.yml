@@ -16,15 +16,15 @@ jobs:
           sudo apt autoremove
           sudo apt update
 
-          sudo rm /usr/bin/clang
-          sudo rm /usr/bin/clang-13
-          sudo rm /usr/bin/clang-14
-          sudo rm /usr/bin/clang-15
+          sudo rm -f /usr/bin/clang
+          sudo rm -f /usr/bin/clang-13
+          sudo rm -f /usr/bin/clang-14
+          sudo rm -f /usr/bin/clang-15
 
-          sudo rm /usr/bin/clang++
-          sudo rm /usr/bin/clang++-13
-          sudo rm /usr/bin/clang++-14
-          sudo rm /usr/bin/clang++-15
+          sudo rm -f /usr/bin/clang++
+          sudo rm -f /usr/bin/clang++-13
+          sudo rm -f /usr/bin/clang++-14
+          sudo rm -f /usr/bin/clang++-15
 
           wget https://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
           tar -xvJf clang+llvm-3.9.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
@@ -52,9 +52,9 @@ jobs:
           sudo apt install -y ./gcc-4.8_4.8.5-4ubuntu8_amd64.deb ./gcc-4.8-base_4.8.5-4ubuntu8_amd64.deb ./libstdc++-4.8-dev_4.8.5-4ubuntu8_amd64.deb ./cpp-4.8_4.8.5-4ubuntu8_amd64.deb ./libgcc-4.8-dev_4.8.5-4ubuntu8_amd64.deb ./libasan0_4.8.5-4ubuntu8_amd64.deb ./g++-4.8_4.8.5-4ubuntu8_amd64.deb
 
           sudo rm -rf /usr/lib/gcc/x86_64-linux-gnu/9
-          sudo rm -rf  /usr/lib/gcc/x86_64-linux-gnu/10
-          sudo rm -rf  /usr/lib/gcc/x86_64-linux-gnu/11
-          sudo rm -rf  /usr/lib/gcc/x86_64-linux-gnu/12
+          sudo rm -rf /usr/lib/gcc/x86_64-linux-gnu/10
+          sudo rm -rf /usr/lib/gcc/x86_64-linux-gnu/11
+          sudo rm -rf /usr/lib/gcc/x86_64-linux-gnu/12
 
           git clone https://github.com/dotnet/runtime.git
           sudo bash ./runtime/eng/common/native/install-dependencies.sh
