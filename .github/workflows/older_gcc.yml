@@ -16,6 +16,9 @@ jobs:
           sudo apt autoremove
           sudo apt update
 
+          sudo rm /usr/bin/clang
+          sudo rm /usr/bin/clang++
+
           wget https://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
           tar -xvJf clang+llvm-3.9.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
           sudo mkdir /opt/clang-3.9
@@ -23,8 +26,8 @@ jobs:
           sudo cp -r * /opt/clang-3.9/
           sudo ln -s /opt/clang-3.9/bin/clang /usr/local/bin/clang
           sudo ln -s /opt/clang-3.9/bin/clang++ /usr/local/bin/clang++
-          sudo ln -s /opt/clang-3.9/bin/clang++ /usr/bin/clang++
           sudo ln -s /opt/clang-3.9/bin/clang /usr/bin/clang
+          sudo ln -s /opt/clang-3.9/bin/clang++ /usr/bin/clang++
 
           sudo update-alternatives --install /usr/bin/clang clang /opt/clang-3.9/bin/clang 100 
           sudo update-alternatives --install /usr/bin/clang++ clang++ /opt/clang-3.9/bin/clang++ 100
