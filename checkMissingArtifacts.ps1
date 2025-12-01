@@ -15,29 +15,54 @@ function Check-Arch($path) {
 
     foreach ($arch in $arches) {
         if ($arch -eq "win-arm64") {
-            if ($version -match "^v1") {
+            if ($version -match "^v1.") {
                 continue
             }
-            if ($version -match "^v2") {
+            if ($version -match "^v2.") {
                 continue
             }
-            if ($version -match "^v3") {
+            if ($version -match "^v3.") {
                 continue
             }
-            if ($version -match "^v5") {
+            if ($version -match "^v5.") {
                 continue
             }
         } elseif ($arch -eq "osx-arm64") {
-            if ($version -match "^v1") {
+            if ($version -match "^v1.") {
                 continue
             }
-            if ($version -match "^v2") {
+            if ($version -match "^v2.") {
                 continue
             }
-            if ($version -match "^v3") {
+            if ($version -match "^v3.") {
                 continue
             }
-            if ($version -match "^v5") {
+            if ($version -match "^v5.") {
+                continue
+            }
+        } elseif ($arch -eq "linux-loongarch64") {
+            if ($version -match "^v1.") {
+                continue
+            }
+            if ($version -match "^v2.") {
+                continue
+            }
+            if ($version -match "^v3.") {
+                continue
+            }
+            if ($version -match "^v5.") {
+                continue
+            }
+            if ($version -match "^v6.") {
+                continue
+            }
+            if ($version -match "^v7.") {
+                continue
+            }
+            if ($version -match "^v8.") {
+                continue
+            }
+            if ($version -match "^v9.") {
                 continue
             }
         }
