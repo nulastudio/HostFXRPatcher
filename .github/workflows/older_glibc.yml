@@ -1,0 +1,20 @@
+name: older glibc
+
+on:
+  workflow_dispatch:
+
+jobs:
+  linux-older-gcc:
+    name: older glibc
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Patcher
+      - run: |
+          git clone https://github.com/dotnet/runtime.git
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patched-hostfxr_linux-x64
+          path: runtime/artifacts-patched
+      - uses: fawazahmed0/action-debug-vscode@main
