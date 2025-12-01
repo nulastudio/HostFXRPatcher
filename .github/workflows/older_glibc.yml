@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  linux-older-gcc:
-    name: older glibc
+  linux-x64_older_glibc:
+    name: Build linux-x64 Artifacts(older glibc)
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -18,4 +18,36 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: patched-hostfxr_linux-x64
+          path: runtime/artifacts-patched
+
+  linux-arm_older_glibc:
+    name: Build linux-arm Artifacts(older glibc)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Patcher
+      - run: |
+            git clone https://github.com/dotnet/runtime.git
+            cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
+            docker run --rm -v ~/work/HostFXRPatcher/HostFXRPatcher/runtime:/runtime -w /runtime -e ROOTFS_DIR=/crossrootfs/arm/ mcr.microsoft.com/dotnet-buildtools/prereqs:azurelinux-3.0-net8.0-cross-arm bash -c 'git config --global --add safe.directory /runtime ; cd HostFXRPatcher ; pwsh updateVersionReleases.ps1 ; ROOTFS_DIR=/crossrootfs/arm pwsh ./buildPatch.ps1 -rid linux-arm -configuration Release -versions ${{ vars.VERSIONS }} -portable -stripsymbols -cross'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patched-hostfxr_linux-arm
+          path: runtime/artifacts-patched
+
+  linux-arm64_older_glibc:
+    name: Build linux-arm64 Artifacts(older glibc)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Patcher
+      - run: |
+            git clone https://github.com/dotnet/runtime.git
+            cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
+            docker run --rm -v ~/work/HostFXRPatcher/HostFXRPatcher/runtime:/runtime -w /runtime -e ROOTFS_DIR=/crossrootfs/arm64/ mcr.microsoft.com/dotnet-buildtools/prereqs:azurelinux-3.0-net8.0-cross-arm64 bash -c 'git config --global --add safe.directory /runtime ; cd HostFXRPatcher ; pwsh updateVersionReleases.ps1 ; ROOTFS_DIR=/crossrootfs/arm64 pwsh ./buildPatch.ps1 -rid linux-arm64 -configuration Release -versions ${{ vars.VERSIONS }} -portable -stripsymbols -cross'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patched-hostfxr_linux-arm64
           path: runtime/artifacts-patched
