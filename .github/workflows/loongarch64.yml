@@ -14,7 +14,7 @@ jobs:
       - run: |
             git clone https://github.com/dotnet/runtime.git
             cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
-            docker run --rm -v ~/work/HostFXRPatcher/HostFXRPatcher/runtime:/runtime -w /runtime -e ROOTFS_DIR=/crossrootfs/loongarch64/ mcr.microsoft.com/dotnet-buildtools/prereqs:azurelinux-3.0-net8.0-cross-loongarch64 bash -c 'git config --global --add safe.directory /runtime ; cd HostFXRPatcher ; pwsh updateVersionReleases.ps1 ; ROOTFS_DIR=/crossrootfs/loongarch64 pwsh ./buildPatch.ps1 -rid linux-loongarch64 -configuration Release -versions ${{ vars.VERSIONS }} -portable -stripsymbols -cross'
+            docker run --rm -v ~/work/HostFXRPatcher/HostFXRPatcher/runtime:/runtime -w /runtime -e ROOTFS_DIR=/crossrootfs/loongarch64/ mcr.microsoft.com/dotnet-buildtools/prereqs:azurelinux-3.0-net10.0-cross-loongarch64 bash -c 'git config --global --add safe.directory /runtime ; cd HostFXRPatcher ; pwsh updateVersionReleases.ps1 ; ROOTFS_DIR=/crossrootfs/loongarch64 pwsh ./buildPatch.ps1 -rid linux-loongarch64 -configuration Release -versions ${{ vars.VERSIONS }} -portable -stripsymbols -cross'
       - uses: actions/upload-artifact@v4
         with:
           name: patched-hostfxr_linux-loongarch64
