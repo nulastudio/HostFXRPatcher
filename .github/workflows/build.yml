@@ -124,7 +124,7 @@ jobs:
 
     osx-x64:
       name: Build osx-x64 Artifacts
-      runs-on: macos-13
+      runs-on: macos-15-intel
       steps:
         - uses: actions/checkout@v4
           with:
@@ -144,7 +144,7 @@ jobs:
 
     osx-arm64:
       name: Build osx-arm64 Artifacts
-      runs-on: macos-13
+      runs-on: macos-15-intel
       steps:
         - uses: actions/checkout@v4
           with:
