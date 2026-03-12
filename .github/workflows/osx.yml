@@ -1,0 +1,45 @@
+name: Build Macintosh HostFXR
+
+on:
+  workflow_dispatch:
+
+jobs:
+    osx-x64:
+      name: Build osx-x64 Artifacts
+      runs-on: macos-15-intel
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            ref: Patcher
+        - run: |
+            sudo xcode-select --switch /Applications/Xcode_16.4.0.app/Contents/Developer
+            git clone https://github.com/dotnet/runtime.git
+            bash ./runtime/eng/common/native/install-dependencies.sh
+            cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
+            cd ./runtime/HostFXRPatcher/
+            pwsh ./updateVersionReleases.ps1
+            pwsh ./buildPatch.ps1 -rid osx-x64 -configuration Release -versions ${{ vars.VERSIONS }} -portable -stripsymbols
+        - uses: actions/upload-artifact@v4
+          with:
+            name: patched-hostfxr_osx-x64
+            path: runtime/artifacts-patched
+
+    osx-arm64:
+      name: Build osx-arm64 Artifacts
+      runs-on: macos-15-intel
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            ref: Patcher
+        - run: |
+            sudo xcode-select --switch /Applications/Xcode_16.4.0.app/Contents/Developer
+            git clone https://github.com/dotnet/runtime.git
+            bash ./runtime/eng/common/native/install-dependencies.sh
+            cp -r ./HostFXRPatcher/ ./runtime/HostFXRPatcher
+            cd ./runtime/HostFXRPatcher/
+            pwsh ./updateVersionReleases.ps1
+            pwsh ./buildPatch.ps1 -rid osx-arm64 -configuration Release -versions ${{ vars.VERSIONS }} -portable -stripsymbols -cross
+        - uses: actions/upload-artifact@v4
+          with:
+            name: patched-hostfxr_osx-arm64
+            path: runtime/artifacts-patched

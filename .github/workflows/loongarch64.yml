@@ -1,4 +1,4 @@
-name: loongarch64 test
+name: Build LoongArch HostFXR
 
 on:
   workflow_dispatch:

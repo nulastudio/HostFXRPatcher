@@ -1,11 +1,11 @@
-name: older glibc
+name: Build Linux HostFXR
 
 on:
   workflow_dispatch:
 
 jobs:
-  linux-x64_older_glibc:
-    name: Build linux-x64 Artifacts(older glibc)
+  linux-x64:
+    name: Build linux-x64 Artifacts
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +20,8 @@ jobs:
           name: patched-hostfxr_linux-x64
           path: runtime/artifacts-patched
 
-  linux-arm_older_glibc:
-    name: Build linux-arm Artifacts(older glibc)
+  linux-arm:
+    name: Build linux-arm Artifacts
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -36,8 +36,8 @@ jobs:
           name: patched-hostfxr_linux-arm
           path: runtime/artifacts-patched
 
-  linux-arm64_older_glibc:
-    name: Build linux-arm64 Artifacts(older glibc)
+  linux-arm64:
+    name: Build linux-arm64 Artifacts
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
